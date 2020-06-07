@@ -1,6 +1,7 @@
 import json
 import re
 import yaml
+import logging
 from flask import Flask, request, abort
 from gitlab import Gitlab
 from pandas import DataFrame
@@ -32,6 +33,7 @@ def index():
                 update_mr_description(mr, aggregate)
             return "ok"
         except:
+            logging.exception("Some error occured.")
             abort(500)
     else:
         return "ok"
