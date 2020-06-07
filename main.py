@@ -15,12 +15,11 @@ NOTE_PATTERN = re.compile(r'```yaml\n*((.|\s)*)\n*```')
 
 @app.route("/", methods=["POST"])
 def index():
-    # if secretkey != request.args.get("secretkey", ""):
-    #     abort(400)
-    # TODO: シークレットキーや、eventのタイプをフィルターする処理
+    if (request.headers.get("X-Gitlab-Token", "") != secretkey) or (request.headers.get("X-Gitlab-Event", "") != "Note Hook"):
+        abort(400)
 
-    data = json.loads(request.data)
-    if ('object_kind' in data) and ('merge_request' in data):
+    data = json.loads(request.get_data())
+    if ('merge_request' in data):
         project_id = data["project"]["id"]
         mr_id = data["merge_request"]["iid"]
 
@@ -33,8 +32,7 @@ def index():
                 update_mr_description(mr, aggregate)
             return "ok"
         except:
-            abort()
-
+            abort(500)
     else:
         return "ok"
 
